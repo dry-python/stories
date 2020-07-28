@@ -41,7 +41,8 @@ nav:
   - Guides:
       - Debugging: debugging.md
       - Composition: composition.md
+      - Transaction management: transactions.md
   - Contrib:
-      - Py.test: contrib/pytest.md
-      - Debug toolbars: contrib/debug_toolbars.md
-      - Sentry: contrib/sentry.md
+      - Py.test: pytest.md
+      - Debug toolbars: debug_toolbars.md
+      - Sentry: sentry.md

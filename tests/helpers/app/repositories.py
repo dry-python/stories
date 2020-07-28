@@ -59,3 +59,11 @@ def load_subscription(category_id, profile_id):
 
 def send_notification(kind, profile, category_name):
     pass
+
+
+def lock_item():
+    print("UPDATE 'items';")
+
+
+def charge_money():
+    print("UPDATE 'balance';")

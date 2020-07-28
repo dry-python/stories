@@ -1,6 +1,6 @@
 # Py.Test contrib
 
-![Py.Test](../images/pytest.png)
+![Py.Test](./images/pytest.png)
 
 Py.test plugin provides an additional report for failed tests. It contains:
 

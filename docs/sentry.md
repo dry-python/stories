@@ -3,7 +3,7 @@
 This is a picture of the execution path and context variables of the business
 object shown in the error report breadcrumbs section:
 
-![Sentry](../images/sentry.png)
+![Sentry](./images/sentry.png)
 
 ## Settings
 
