@@ -1,3 +1,5 @@
+import functools
+
 import _stories.context
 import _stories.mounted
 
@@ -25,3 +27,17 @@ def make_collector():
         return storage[0]
 
     return getter
+
+
+def is_not_empty(f):
+    """Assert generator yields value at least once."""
+
+    @functools.wraps(f)
+    def wrapper():
+        count = 0
+        for value in f():
+            count += 1
+            yield value
+        assert count > 0
+
+    return wrapper

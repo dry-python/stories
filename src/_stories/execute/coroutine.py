@@ -26,7 +26,7 @@ async def execute(runner, ctx, ns, bind, history, methods):
             history.on_substory_start(method.story_name)
             try:
                 contract.check_substory_call(ctx, ns)
-            except Exception as error:
+            except Exception as error:  # noqa: B902
                 history.on_error(error.__class__.__name__)
                 raise
             continue
@@ -40,7 +40,7 @@ async def execute(runner, ctx, ns, bind, history, methods):
 
         try:
             result = await method(ctx)
-        except Exception as error:
+        except Exception as error:  # noqa: B902
             history.on_error(error.__class__.__name__)
             raise
 
@@ -51,7 +51,7 @@ async def execute(runner, ctx, ns, bind, history, methods):
         if restype is Failure:
             try:
                 protocol.check_return_statement(method, result.reason)
-            except Exception as error:
+            except Exception as error:  # noqa: B902
                 history.on_error(error.__class__.__name__)
                 raise
             history.on_failure(result.reason)

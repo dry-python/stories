@@ -1,11 +1,5 @@
-from inspect import isclass
 from operator import itemgetter
 
-from _stories.compat import CerberusSpec
-from _stories.compat import MarshmallowError
-from _stories.compat import MarshmallowSpec
-from _stories.compat import PydanticError
-from _stories.compat import PydanticSpec
 from _stories.exceptions import ContextContractError
 
 
@@ -97,114 +91,13 @@ from _stories.exceptions import ContextContractError
 # NOTE: `noqa` comments are not part of the program output.
 
 
-# Validators.
-
-
-class PydanticValidator:
-    def __init__(self, spec, field):
-        self.spec = spec
-        self.field = field
-
-    def __call__(self, value):
-        return self.field.validate(value, {}, loc=self.field.alias, cls=self.spec)
-
-    def __repr__(self):
-        return self.field._type_display()
-
-
-class MarshmallowValidator:
-    def __init__(self, spec, field):
-        self.spec = spec
-        self.field = field
-
-    def __call__(self, value):
-        try:
-            return self.spec().load({self.field: value}).get(self.field), None
-        except MarshmallowError as error:
-            return None, error.messages[self.field]
-
-    def __repr__(self):
-        field = self.spec._declared_fields[self.field]
-        return field.__class__.__name__
-
-
-class CerberusValidator:
-    def __init__(self, spec, field):
-        self.spec = spec
-        self.field = field
-
-    def __call__(self, value):
-        validated = CerberusSpec()
-        validated.validate({self.field: value}, self.spec.schema.schema)
-        return validated.document.get(self.field), validated.errors.get(self.field)
-
-    def __repr__(self):
-        schema = self.spec.schema.schema[self.field]
-        field_type = schema["type"]
-        if "schema" in schema and "type" in schema["schema"]:
-            field_type += "[" + schema["schema"]["type"] + "]"
-        return field_type
-
-
-class RawValidator:
-    def __init__(self, validator):
-        self.validator = validator
-
-    def __call__(self, value):
-        return self.validator(value)
-
-    def __repr__(self):
-        return self.validator.__name__
-
-
-# Disassemble.
-
-
-def disassemble_pydantic(spec):
-    result = {}
-    for name, field in spec.__fields__.items():
-        result[name] = PydanticValidator(spec, field)
-    return result
-
-
-def disassemble_marshmallow(spec):
-    result = {}
-    for name in spec._declared_fields:
-        result[name] = MarshmallowValidator(spec, name)
-    return result
-
-
-def disassemble_cerberus(spec):
-    result = {}
-    for name in spec.schema:
-        result[name] = CerberusValidator(spec, name)
-    return result
-
-
-def disassemble_raw(spec):
-    result = {}
-    for name, validator in spec.items():
-        result[name] = RawValidator(validator)
-    return result
-
-
-# Execute.
-
-
 def make_contract(cls_name, name, arguments, spec):
     __tracebackhide__ = True
     if spec is None:
         return NullContract(cls_name, name, arguments)
-    elif isinstance(spec, PydanticSpec):
-        disassembled = disassemble_pydantic(spec)
-    elif isinstance(spec, MarshmallowSpec):
-        disassembled = disassemble_marshmallow(spec)
-    elif isinstance(spec, CerberusSpec):
-        disassembled = disassemble_cerberus(spec)
     elif isinstance(spec, dict):
-        disassembled = disassemble_raw(spec)
-    check_arguments_definitions(cls_name, name, arguments, disassembled)
-    return SpecContract(cls_name, name, arguments, disassembled, spec)
+        check_arguments_definitions(cls_name, name, arguments, spec)
+        return SpecContract(cls_name, name, arguments, spec.copy())
 
 
 def check_arguments_definitions(cls_name, name, arguments, spec):
@@ -293,9 +186,8 @@ class SpecContract(NullContract):
     # FIXME: Deny empty disassembled spec.  If there is such need, we
     # should replace `NullContract` with empty `SpecContract`
     # ourselves.
-    def __init__(self, cls_name, name, arguments, spec, origin):
+    def __init__(self, cls_name, name, arguments, spec):
         self.spec = spec
-        self.origin = origin
         super().__init__(cls_name, name, arguments)
         self.make_declared()
 
@@ -464,40 +356,11 @@ class SpecContract(NullContract):
 
 def format_violations(kwargs, errors):
     result = []
-
-    def normalize(value, indent, list_item=False, dict_value=False):
-        if isinstance(value, dict):
-            normalize_dict(value, indent + 2)
-        elif isinstance(value, list):
-            normalize_list(value, indent if list_item else indent + 2)
-        elif isinstance(value, PydanticError):
-            indent = indent + 2 if dict_value else indent
-            normalize_pydantic(value, indent)
-        else:
-            indent = indent + 2 if dict_value else indent
-            normalize_str(value, indent)
-
-    def normalize_dict(value, indent, sep=None):
-        for key in sorted(value):
-            normalize(str(key) + ":", indent)
-            if sep is not None:
-                normalize(repr(kwargs[key]), indent, dict_value=True)
-            normalize(value[key], indent, dict_value=True)
-            if sep is not None:
-                normalize_str(sep, 0)
-
-    def normalize_list(value, indent):
-        for elem in value:
-            normalize(elem, indent, list_item=True)
-
-    def normalize_pydantic(value, indent):
-        normalize_str(str(value.exc), indent)
-
-    def normalize_str(value, indent):
-        result.append(" " * indent + value)
-
-    normalize_dict(errors, 0, "")
-
+    for key in sorted(errors):
+        result.append(key + ":")
+        result.append("  " + repr(kwargs[key]))
+        result.append("  " + errors[key])
+        result.append("")
     return "\n".join(result).strip()
 
 
@@ -552,10 +415,7 @@ def combine_declared(parent, child):
 
 def format_contract(contract):
     if type(contract) is SpecContract:
-        if isclass(contract.origin):
-            return contract.origin.__bases__[0]
-        else:
-            return type(contract.origin)
+        return "dict"
     else:
         return None
 

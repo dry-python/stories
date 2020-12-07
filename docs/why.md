@@ -110,29 +110,29 @@ mapping of fields from the database model to the JSON object.
 
 And we actually do.
 
-```pycon
+```python
 
->>> from rest_framework.fields import IntegerField
->>> from rest_framework.serializers import Serializer
+from rest_framework.fields import IntegerField
+from rest_framework.serializers import Serializer
 
->>> class SubscriptionSerializer(Serializer):
-...     category_id = IntegerField()
-...     price_id = IntegerField()
+class SubscriptionSerializer(Serializer):
+    category_id = IntegerField()
+    price_id = IntegerField()
 
 ```
 
 But in addition we see this method:
 
-```pycon
+```python
 
->>> def recreate_nested_writable_fields(self, instance):
-...     for field, values in self.writable_fields_to_recreate():
-...         related_manager = getattr(instance, field)
-...         related_manager.all().delete()
-...         for data in values:
-...             obj = related_manager.model.objects.create(
-...                 to=instance, **data)
-...             related_manager.add(obj)
+def recreate_nested_writable_fields(self, instance):
+    for field, values in self.writable_fields_to_recreate():
+        related_manager = getattr(instance, field)
+        related_manager.all().delete()
+        for data in values:
+            obj = related_manager.model.objects.create(
+                to=instance, **data)
+            related_manager.add(obj)
 
 ```
 
@@ -167,20 +167,20 @@ for decision making.
 Usually, our first thought will be moving our business logic from the view into
 a function.
 
-```pycon
+```python
 
->>> def buy_subscription(category_id, price_id, user):
-...
-...     category = find_category(category_id)
-...     price = find_price(price_id)
-...     profile = find_profile(user)
-...     if profile.balance < price.cost:
-...         raise ValueError
-...     decrease_balance(profile, price.cost)
-...     save_profile(profile)
-...     expires = calculate_period(price.period)
-...     subscription = create_subscription(profile, category, expires)
-...     notification = send_notification('subscribe', profile, category)
+def buy_subscription(category_id, price_id, user):
+
+    category = find_category(category_id)
+    price = find_price(price_id)
+    profile = find_profile(user)
+    if profile.balance < price.cost:
+        raise ValueError
+    decrease_balance(profile, price.cost)
+    save_profile(profile)
+    expires = calculate_period(price.period)
+    subscription = create_subscription(profile, category, expires)
+    notification = send_notification('subscribe', profile, category)
 
 ```
 
@@ -213,23 +213,23 @@ There is a better way.
 
 Wouldn't it be nice if we can just read business logic as it was intended?
 
-```pycon
+```python
 
->>> from stories import story, arguments
+from stories import story, arguments
 
->>> class Subscription:
-...
-...     @story
-...     @arguments("category_id", "price_id")
-...     def buy(I):
-...
-...         I.find_category
-...         I.find_price
-...         I.find_profile
-...         I.check_balance
-...         I.persist_payment
-...         I.persist_subscription
-...         I.send_subscription_notification
+class Subscription:
+
+    @story
+    @arguments("category_id", "price_id")
+    def buy(I):
+
+        I.find_category
+        I.find_price
+        I.find_profile
+        I.check_balance
+        I.persist_payment
+        I.persist_subscription
+        I.send_subscription_notification
 
 ```
 

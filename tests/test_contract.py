@@ -155,11 +155,9 @@ T.x:
 
 Contract:
   foo:
-    {str_field_repr}  # Argument of E.y
-    {int_field_repr}  # Argument of T.x
-    """.strip().format(
-        **m.representations
-    )
+    String()  # Argument of E.y
+    Integer()  # Argument of T.x
+    """.strip()
 
     with pytest.raises(ContextContractError) as exc_info:
         r(J().a)()
@@ -288,14 +286,12 @@ T.x:
 
 Contract:
   bar:
-    {list_of_str_field_repr}  # Argument of J.a
-    {list_of_int_field_repr}  # Argument of T.x
+    List(String())  # Argument of J.a
+    List(Integer())  # Argument of T.x
   foo:
-    {str_field_repr}  # Argument of J.a
-    {int_field_repr}  # Argument of T.x
-    """.strip().format(
-        **m.representations
-    )
+    String()  # Argument of J.a
+    Integer()  # Argument of T.x
+    """.strip()
 
     with pytest.raises(ContextContractError) as exc_info:
         r(J().a)(foo="1", bar=["2"])
@@ -319,8 +315,7 @@ def test_context_variables_validation(r, m):
 
     # Simple.
 
-    expected = (
-        """
+    expected = """
 This variable violates context contract: 'foo'
 
 Function returned value: T.one
@@ -329,14 +324,11 @@ Violations:
 
 foo:
   '<boom>'
-  {int_error}
+  Invalid value
 
 Contract:
-  foo: {int_field_repr}  # Variable in T.x
+  foo: Integer()  # Variable in T.x
     """.strip()
-        .format(**m.representations)
-        .format("foo")
-    )
 
     with pytest.raises(ContextContractError) as exc_info:
         r(T().x)()
@@ -348,8 +340,7 @@ Contract:
 
     # Substory DI.
 
-    expected = (
-        """
+    expected = """
 This variable violates context contract: 'foo'
 
 Function returned value: T.one
@@ -358,14 +349,11 @@ Violations:
 
 foo:
   '<boom>'
-  {int_error}
+  Invalid value
 
 Contract:
-  foo: {int_field_repr}  # Variable in T.x
+  foo: Integer()  # Variable in T.x
     """.strip()
-        .format(**m.representations)
-        .format("foo")
-    )
 
     with pytest.raises(ContextContractError) as exc_info:
         r(J().a)()
@@ -395,8 +383,7 @@ def test_story_arguments_validation(r, m):
 
     # Simple.
 
-    expected = (
-        """
+    expected = """
 These arguments violates context contract: 'bar', 'foo'
 
 Story method: T.x
@@ -405,19 +392,16 @@ Violations:
 
 bar:
   ['<boom>']
-  {list_of_int_error}
+  Invalid value
 
 foo:
   '<boom>'
-  {int_error}
+  Invalid value
 
 Contract:
-  bar: {list_of_int_field_repr}  # Argument of T.x
-  foo: {int_field_repr}  # Argument of T.x
+  bar: List(Integer())  # Argument of T.x
+  foo: Integer()  # Argument of T.x
     """.strip()
-        .format(**m.representations)
-        .format("foo")
-    )
 
     with pytest.raises(ContextContractError) as exc_info:
         r(T().x)(foo="<boom>", bar=["<boom>"])
@@ -429,8 +413,7 @@ Contract:
 
     # Substory DI.
 
-    expected = (
-        """
+    expected = """
 These arguments violates context contract: 'eggs', 'ham'
 
 Story method: J.a
@@ -439,19 +422,16 @@ Violations:
 
 eggs:
   '<boom>'
-  {int_error}
+  Invalid value
 
 ham:
   '<boom>'
-  {int_error}
+  Invalid value
 
 Contract:
-  eggs: {int_field_repr}  # Argument of J.a
-  ham: {int_field_repr}  # Argument of J.a
+  eggs: Integer()  # Argument of J.a
+  ham: Integer()  # Argument of J.a
     """.strip()
-        .format(**m.representations)
-        .format("eggs", "ham")
-    )
 
     with pytest.raises(ContextContractError) as exc_info:
         r(J().a)(ham="<boom>", eggs="<boom>")
@@ -479,8 +459,7 @@ def test_story_arguments_validation_many_levels(r, m):
 
     # Substory DI.
 
-    expected = (
-        """
+    expected = """
 These arguments violates context contract: 'foo'
 
 Story method: F.i
@@ -489,14 +468,11 @@ Violations:
 
 foo:
   '<boom>'
-  {int_error}
+  Invalid value
 
 Contract:
-  foo: {int_field_repr}  # Argument of T.x
+  foo: Integer()  # Argument of T.x
     """.strip()
-        .format(**m.representations)
-        .format("foo")
-    )
 
     with pytest.raises(ContextContractError) as exc_info:
         r(F().i)(foo="<boom>", bar=[1])
@@ -623,10 +599,8 @@ Story context contract: None
 
 Substory method: T.x
 
-Substory context contract: {contract_class_repr}
-    """.strip().format(
-        **m.representations
-    )
+Substory context contract: dict
+    """.strip()
 
     with pytest.raises(ContextContractError) as exc_info:
         J().a
@@ -653,12 +627,10 @@ Function assigned value: T.one
 Use a different name for context attribute or add this name to the contract.
 
 Contract:
-  bar: {list_of_int_field_repr}  # Variable in T.x
-  baz: {int_field_repr}  # Variable in T.x
-  foo: {int_field_repr}  # Variable in T.x
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Variable in T.x
+  baz: Integer()  # Variable in T.x
+  foo: Integer()  # Variable in T.x
+    """.strip()
 
     with pytest.raises(ContextContractError) as exc_info:
         r(T().x)()
@@ -678,12 +650,10 @@ Function assigned value: T.one
 Use a different name for context attribute or add this name to the contract.
 
 Contract:
-  bar: {list_of_int_field_repr}  # Variable in T.x
-  baz: {int_field_repr}  # Variable in T.x
-  foo: {int_field_repr}  # Variable in T.x
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Variable in T.x
+  baz: Integer()  # Variable in T.x
+  foo: Integer()  # Variable in T.x
+    """.strip()
 
     with pytest.raises(ContextContractError) as exc_info:
         r(J().a)()
@@ -769,12 +739,10 @@ These arguments are unknown: baz, fox
 Story method: T.x
 
 Contract:
-  bar: {list_of_int_field_repr}  # Argument of T.x
-  foo: {int_field_repr}  # Argument of T.x
-  baz: {int_field_repr}  # Variable in T.x
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Argument of T.x
+  foo: Integer()  # Argument of T.x
+  baz: Integer()  # Variable in T.x
+    """.strip()
 
     with pytest.raises(ContextContractError) as exc_info:
         r(T().x)(baz=1, fox=2)
@@ -792,15 +760,13 @@ These arguments are unknown: beans, fox
 Story method: J.a
 
 Contract:
-  eggs: {int_field_repr}  # Argument of J.a
-  ham: {int_field_repr}  # Argument of J.a
-  bar: {list_of_int_field_repr}  # Variable in T.x
-  baz: {int_field_repr}  # Variable in T.x
-  beans: {int_field_repr}  # Variable in J.a
-  foo: {int_field_repr}  # Variable in T.x
-    """.strip().format(
-        **m.representations
-    )
+  eggs: Integer()  # Argument of J.a
+  ham: Integer()  # Argument of J.a
+  bar: List(Integer())  # Variable in T.x
+  baz: Integer()  # Variable in T.x
+  beans: Integer()  # Variable in J.a
+  foo: Integer()  # Variable in T.x
+    """.strip()
 
     with pytest.raises(ContextContractError) as exc_info:
         r(J().a)(beans=1, fox=2)
@@ -878,12 +844,10 @@ These arguments are unknown: baz, fox
 Story method: T.x
 
 Contract:
-  bar: {list_of_int_field_repr}  # Variable in T.x
-  baz: {int_field_repr}  # Variable in T.x
-  foo: {int_field_repr}  # Variable in T.x
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Variable in T.x
+  baz: Integer()  # Variable in T.x
+  foo: Integer()  # Variable in T.x
+    """.strip()
 
     with pytest.raises(ContextContractError) as exc_info:
         r(T().x)(baz=1, fox=2)
@@ -901,15 +865,13 @@ These arguments are unknown: beans, fox
 Story method: J.a
 
 Contract:
-  bar: {list_of_int_field_repr}  # Variable in T.x
-  baz: {int_field_repr}  # Variable in T.x
-  beans: {int_field_repr}  # Variable in J.a
-  eggs: {int_field_repr}  # Variable in J.a
-  foo: {int_field_repr}  # Variable in T.x
-  ham: {int_field_repr}  # Variable in J.a
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Variable in T.x
+  baz: Integer()  # Variable in T.x
+  beans: Integer()  # Variable in J.a
+  eggs: Integer()  # Variable in J.a
+  foo: Integer()  # Variable in T.x
+  ham: Integer()  # Variable in J.a
+    """.strip()
 
     with pytest.raises(ContextContractError) as exc_info:
         r(J().a)(beans=1, fox=2)
@@ -1187,12 +1149,10 @@ def test_story_contract_representation_with_spec(r, m):
 
     expected = """
 Contract:
-  bar: {list_of_int_field_repr}  # Variable in T.x
-  baz: {int_field_repr}  # Variable in T.x
-  foo: {int_field_repr}  # Variable in T.x
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Variable in T.x
+  baz: Integer()  # Variable in T.x
+  foo: Integer()  # Variable in T.x
+    """.strip()
 
     assert repr(T().x.contract) == expected
 
@@ -1200,15 +1160,13 @@ Contract:
 
     expected = """
 Contract:
-  bar: {list_of_int_field_repr}  # Variable in T.x
-  baz: {int_field_repr}  # Variable in T.x
-  beans: {int_field_repr}  # Variable in J.a
-  eggs: {int_field_repr}  # Variable in J.a
-  foo: {int_field_repr}  # Variable in T.x
-  ham: {int_field_repr}  # Variable in J.a
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Variable in T.x
+  baz: Integer()  # Variable in T.x
+  beans: Integer()  # Variable in J.a
+  eggs: Integer()  # Variable in J.a
+  foo: Integer()  # Variable in T.x
+  ham: Integer()  # Variable in J.a
+    """.strip()
 
     assert repr(J().a.contract) == expected
 
@@ -1216,17 +1174,15 @@ Contract:
 
     expected = """
 Contract:
-  bar: {list_of_int_field_repr}  # Variable in T.x
-  baz: {int_field_repr}  # Variable in T.x
-  beans: {int_field_repr}  # Variable in J.a
-  buzz: {int_field_repr}  # Variable in F.i
-  eggs: {int_field_repr}  # Variable in J.a
-  fizz: {int_field_repr}  # Variable in F.i
-  foo: {int_field_repr}  # Variable in T.x
-  ham: {int_field_repr}  # Variable in J.a
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Variable in T.x
+  baz: Integer()  # Variable in T.x
+  beans: Integer()  # Variable in J.a
+  buzz: Integer()  # Variable in F.i
+  eggs: Integer()  # Variable in J.a
+  fizz: Integer()  # Variable in F.i
+  foo: Integer()  # Variable in T.x
+  ham: Integer()  # Variable in J.a
+    """.strip()
 
     assert repr(F().i.contract) == expected
 
@@ -1253,12 +1209,10 @@ def test_story_contract_representation_with_spec_with_args(r, m):
 
     expected = """
 Contract:
-  bar: {list_of_int_field_repr}  # Argument of T.x
-  foo: {int_field_repr}  # Argument of T.x
-  baz: {int_field_repr}  # Variable in T.x
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Argument of T.x
+  foo: Integer()  # Argument of T.x
+  baz: Integer()  # Variable in T.x
+    """.strip()
 
     assert repr(T().x.contract) == expected
 
@@ -1266,15 +1220,13 @@ Contract:
 
     expected = """
 Contract:
-  bar: {list_of_int_field_repr}  # Argument of T.x
-  eggs: {int_field_repr}  # Argument of J.a
-  foo: {int_field_repr}  # Argument of T.x
-  ham: {int_field_repr}  # Argument of J.a
-  baz: {int_field_repr}  # Variable in T.x
-  beans: {int_field_repr}  # Variable in J.a
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Argument of T.x
+  eggs: Integer()  # Argument of J.a
+  foo: Integer()  # Argument of T.x
+  ham: Integer()  # Argument of J.a
+  baz: Integer()  # Variable in T.x
+  beans: Integer()  # Variable in J.a
+    """.strip()
 
     assert repr(J().a.contract) == expected
 
@@ -1282,17 +1234,15 @@ Contract:
 
     expected = """
 Contract:
-  bar: {list_of_int_field_repr}  # Argument of T.x
-  eggs: {int_field_repr}  # Argument of J.a
-  fizz: {int_field_repr}  # Argument of F.i
-  foo: {int_field_repr}  # Argument of T.x
-  ham: {int_field_repr}  # Argument of J.a
-  baz: {int_field_repr}  # Variable in T.x
-  beans: {int_field_repr}  # Variable in J.a
-  buzz: {int_field_repr}  # Variable in F.i
-    """.strip().format(
-        **m.representations
-    )
+  bar: List(Integer())  # Argument of T.x
+  eggs: Integer()  # Argument of J.a
+  fizz: Integer()  # Argument of F.i
+  foo: Integer()  # Argument of T.x
+  ham: Integer()  # Argument of J.a
+  baz: Integer()  # Variable in T.x
+  beans: Integer()  # Variable in J.a
+  buzz: Integer()  # Variable in F.i
+    """.strip()
 
     assert repr(F().i.contract) == expected
 
@@ -1323,15 +1273,13 @@ def test_story_contract_representation_with_spec_with_args_conflict(r, m):
     expected = """
 Contract:
   bar:
-    {list_of_str_field_repr}  # Argument of J.a
-    {list_of_int_field_repr}  # Argument of T.x
+    List(String())  # Argument of J.a
+    List(Integer())  # Argument of T.x
   foo:
-    {str_field_repr}  # Argument of J.a
-    {int_field_repr}  # Argument of T.x
-  baz: {int_field_repr}  # Variable in T.x
-    """.strip().format(
-        **m.representations
-    )
+    String()  # Argument of J.a
+    Integer()  # Argument of T.x
+  baz: Integer()  # Variable in T.x
+    """.strip()
 
     assert repr(J().a.contract) == expected
 

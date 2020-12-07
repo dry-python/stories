@@ -24,9 +24,6 @@ version = "4.1.0"
 [tool.poetry.dependencies]
 python = "~3.6 || ~3.7 || ~3.8 || ~3.9"
 
-[tool.poetry.plugins.pytest11]
-stories = "stories.contrib.pytest"
-
 [tool.poetry.urls]
 Changelog = "https://proofit404.github.io/stories/changelog/"
 Issues = "https://github.com/proofit404/stories/issues"

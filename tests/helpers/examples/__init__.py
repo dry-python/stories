@@ -1,16 +1,12 @@
 import pytest
 
+import helpers
 
+
+@helpers.is_not_empty
 def runners():
     yield "function"
     yield "coroutine"
-
-
-def contracts():
-    yield "examples.contract.raw"
-    yield "examples.contract.pydantic"
-    yield "examples.contract.marshmallow"
-    yield "examples.contract.cerberus"
 
 
 # Fixtures.
@@ -38,6 +34,6 @@ def x(r):
     return r.import_module("examples.methods")
 
 
-@pytest.fixture(params=contracts())
-def m(r, request):
-    return r.import_module(request.param)
+@pytest.fixture()
+def m(r):
+    return r.import_module("examples.contract")
